@@ -1,0 +1,57 @@
+---
+# The OS target for the binary.
+kind_os: "linux"
+
+# The version of the binary can be a specific version such as: "3.9.0".
+kind_version: "latest"
+
+# The owner of the installed binary.
+kind_owner: "root"
+
+# The group of the installed binary.
+kind_group: "root"
+
+# The permissions of the installed binary.
+kind_mode: 0755
+
+# The permissions of the binary directory.
+kind_bin_dir_mode: 0755
+
+# The directory to install the binary in.
+kind_bin_dir: "/usr/local/share/kind"
+
+# The full path to the binary.
+kind_bin_path: "{{ kind_bin_dir }}/kind"
+
+# The symlink path created to the binary.
+kind_link_path: "/usr/local/bin/kind"
+
+# The URL to the repository.
+kind_repo_url: "https://kind.sigs.k8s.io"
+
+# The URL to the file.
+kind_file_url: "{{ kind_repo_url }}/dl/v{{ kind_version }}/kind-{{ kind_os }}-{{ kind_architecture }}"
+
+# The URL to fetch the latest version from.
+kind_version_url: "https://api.github.com/repos/kubernetes-sigs/kind/releases/latest"
+
+# The URL to the checksum of the file.
+kind_checksum_url: "{{ kind_file_url }}.sha256sum"
+
+# The architecture target for the binary.
+kind_architecture: "{{ kind_architecture_map[ansible_architecture] }}"
+
+# The architecture map used to set the correct name according to the
+# repository file names.
+kind_architecture_map:
+  {
+    "aarch": "arm64",
+    "aarch64": "arm64",
+    "amd64": "amd64",
+    "arm64": "arm64",
+    "armhf": "armhf",
+    "armv7l": "armhf",
+    "ppc64le": "ppc64le",
+    "s390x": "s390x",
+    "x86_64": "amd64",
+  }

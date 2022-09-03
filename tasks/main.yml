@@ -1,0 +1,60 @@
+---
+- name: Check if binary exists
+  ansible.builtin.stat:
+    path: "{{ kind_bin_path }}"
+  register: kind_bin
+
+- name: Get current version
+  ansible.builtin.command: "{{ kind_bin_path }} version"
+  failed_when: false
+  changed_when: false
+  register: kind_current_version
+
+- name: Get latest version
+  block:
+    - name: Get latest version
+      ansible.builtin.uri:
+        url: "{{ kind_version_url }}"
+        return_content: true
+        body_format: json
+      register: kind_latest_version
+
+    - name: Set latest version fact
+      ansible.builtin.set_fact:
+        kind_version: "{{ kind_latest_version.json.tag_name | regex_replace('^v', '') }}"
+  when: kind_version == "latest"
+
+- name: Download file
+  block:
+    - name: Ensure bin directory exists
+      ansible.builtin.file:
+        path: "{{ kind_bin_dir }}"
+        owner: "{{ kind_owner }}"
+        group: "{{ kind_group }}"
+        mode: "{{ kind_bin_dir_mode }}"
+        state: directory
+
+    - name: Download file
+      ansible.builtin.get_url:
+        url: "{{ kind_file_url }}"
+        dest: "{{ kind_bin_path }}"
+        checksum: "sha256:{{ kind_checksum_url }}"
+        owner: "{{ kind_owner }}"
+        group: "{{ kind_group }}"
+        mode: "{{ kind_mode }}"
+        force: true
+      register: kind_download
+  when: >
+    not kind_bin.stat.exists
+    or kind_version not in kind_current_version.stdout
+
+- name: Create symlink
+  ansible.builtin.file:
+    src: "{{ kind_bin_path }}"
+    dest: "{{ kind_link_path }}"
+    owner: "{{ kind_owner }}"
+    group: "{{ kind_group }}"
+    mode: "{{ kind_mode }}"
+    force: true
+    state: link
+  when: kind_download is changed
