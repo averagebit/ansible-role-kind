@@ -4,7 +4,7 @@
 
 ## Description
 
-Installs [Kind](https://kind.sigs.k8s.io/).
+Ansible role to install [Kind](https://kind.sigs.k8s.io/).
 
 ## Requirements
 
